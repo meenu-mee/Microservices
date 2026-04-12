@@ -12,9 +12,9 @@ namespace PlatformsService.Models
         // The 'required' keyword indicates that this property must be set during object initialization
         public required string Name { get; set; }
         [Required]
-        public int Publisher { get; set; }
+        public string Publisher { get; set; }
         [Required]
-        public int Cost { get; set; }
+        public string Cost { get; set; }
 
     }
 }
