@@ -49,12 +49,16 @@ namespace PlatformsService.Controllers
         [HttpPost]
         public ActionResult<PlatformReadDto> CreatePlatform(PlatformCreateDto platformCreateDto)
         {
+            // Map the incoming PlatformCreateDto object to a Platform model, create the new platform in the repository, and save the changes to the database
             var platformModel = _mapper.Map<Platform>(platformCreateDto);
             _repository.CreatePlatform(platformModel);
             _repository.SaveChanges();
 
+            // Map the newly created Platform model to a PlatformReadDto object to return in the response
             var platformReadDto = _mapper.Map<PlatformReadDto>(platformModel);
 
+            // Return a 201 Created response with the location of the newly created platform and the platform data in the response body 
+            // (e.g., location header will be /api/platforms/{id} where {id} is the ID of the newly created platform)
             return CreatedAtRoute(nameof(GetPlatformById), new { Id = platformReadDto.Id }, platformReadDto);
         }
     }
