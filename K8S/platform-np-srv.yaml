@@ -1,0 +1,41 @@
+# This YAML file defines a Kubernetes Service of type NodePort for the PlatformService application.
+# The Service is configured to expose port 80 for the application and route traffic to the pods that are labeled with "app: platformservice".
+# To apply this service configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f platform-np-srv.yaml
+
+# After applying the service, you can check the status of the service and the endpoints using:
+# kubectl get services
+# kubectl get endpoints
+
+# The Service resource is defined with the following specifications:
+# - apiVersion: Specifies the API version of the Kubernetes resource (v1 for Services).
+# - kind: Specifies the type of Kubernetes resource (Service).
+# - metadata: Contains metadata about the resource, such as its name.
+# - spec: Contains the specifications for the Service, including the type of service, the selector for matching pods, and the ports to expose.
+# - type: Specifies the type of service (NodePort in this case), which determines how the service is exposed. NodePort exposes the service on a static port on each node in the cluster, allowing external traffic to access the service.
+# - selector: Defines how to identify the pods that belong to this Service using labels. The selector matches the labels defined in the Deployment, ensuring that the Service routes traffic to the correct pods.
+# - ports : Specifies the ports to expose for the service, including the name, protocol, port number, and target port. The port number is the port that the service will listen on, while the target port is the port on the pods that the service will route traffic to (in this case, both are set to 80).
+
+# Note: When using a NodePort service, Kubernetes will automatically assign a port in the range 30000-32767 for external access. You can specify a custom port by adding the "nodePort" field under the ports section if you want to use a specific port for external access.
+# For example, to specify a custom node port, you can modify the ports section as follows:
+# ports:
+#   - name: platformservice-port
+#     protocol: TCP
+#     port: 80
+#     targetPort: 80
+#     nodePort: 30080   
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-np-srv
+spec:
+  type: NodePort
+  selector:
+    app: platformservice
+  ports:
+    - name: platformservice-port
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30080

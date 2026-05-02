@@ -59,6 +59,8 @@ namespace PlatformsService.Controllers
 
             // Return a 201 Created response with the location of the newly created platform and the platform data in the response body 
             // (e.g., location header will be /api/platforms/{id} where {id} is the ID of the newly created platform)
+            // nameof(GetPlatformById) : ensures the response includes a Location header pointing to the URL for fetching the platform by its ID
+            // new { Id = platformReadDto.Id } : supplies the route values—the ID of the created platform—to construct the full URL dynamically. 
             return CreatedAtRoute(nameof(GetPlatformById), new { Id = platformReadDto.Id }, platformReadDto);
         }
     }

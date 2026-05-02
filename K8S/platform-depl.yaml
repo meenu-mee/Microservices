@@ -1,0 +1,42 @@
+# Kubernetes deployment configuration for the PlatformService application
+# The Deployment is configured to use the Docker image "meenumee/platformservice:latest" and exposes port 80 for the application.
+
+# To apply this deployment configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f platform-depl.yaml 
+# After applying the deployment, you can check the status of the deployment and the running pods using:
+# kubectl get deployments
+# kubectl get pods  
+
+# The Deployment resource is defined with the following specifications:
+# - apiVersion: Specifies the API version of the Kubernetes resource (apps/v1 for Deployments).
+# - kind: Specifies the type of Kubernetes resource (Deployment).
+# - metadata: Contains metadata about the resource, such as its name.
+# - spec: Contains the specifications for the Deployment, including the number of replicas, the selector for matching pods, and the template for the pod specification.
+# - replicas: Specifies the desired number of pod replicas to run for the application (in this case, 3).
+# - selector: Defines how to identify the pods that belong to this Deployment using labels.
+# - matchLabels: Specifies the labels that must be present on the pods for them to be managed by this Deployment (in this case, app: platformservice) meaning that any pod with the label "app: platformservice" will be managed by this Deployment.
+# - template: Defines the pod template, which includes metadata and the specification for the containers that will run in the pods. The pod template is used to create the pods that will run the application. It consists of:
+# - metadata: Contains metadata for the pod template. Pod templates are used to define the configuration of the pods that will be created by the Deployment. 
+# The metadata section of the pod template can include labels, which are key-value pairs that can be used to organize and select resources in Kubernetes. In this case, the pod template has a label "app: platformservice", which matches the selector defined in the Deployment spec. This means that any pods created from this template will have the label "app: platformservice" and will be managed by this Deployment.
+# - spec: Contains the specifications for the pod, including the container configuration. The spec section of the pod template defines the configuration for the containers that will run in the pods created by the Deployment. This includes details such as the container image to use, the ports to expose, and any environment variables or volume mounts needed for the application to run properly.
+# - containers: Specifies the container configuration, including the name, image, and ports to expose for the application.  
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platformservice
+  template:
+    metadata:
+      labels:
+        app: platformservice
+    spec:
+      containers: 
+      - name: platformservice
+        image: meenumee/platformservice:latest
+        ports:
+          - containerPort: 8080
