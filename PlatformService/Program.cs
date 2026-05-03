@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PlatformsService.Data;
+using PlatformsService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Register the repository for dependency injection
 builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
+// Register the HTTP client for the ICommandDataClient interface, specifying HttpCommandDataClient as the implementation
+builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 
 var app = builder.Build(); 
 
