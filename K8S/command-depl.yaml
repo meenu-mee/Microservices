@@ -1,0 +1,39 @@
+# Kubernetes deployment configuration for the CommandService application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: command-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: commandservice
+  template:
+    metadata:
+      labels:
+        app: commandservice
+    spec:
+      containers: 
+      - name: commandservice
+        image: meenumee/commandservice:latest
+        ports:
+          - containerPort: 8080
+# Note: The containerPort is set to 8080, which means that the application inside the container is listening on port 8080. The Service defined in the platform-np-srv.yaml file will route traffic to this port on the pods created by this Deployment.
+---
+# This YAML file defines a Kubernetes Service of type ClusterIP for the CommandService application.
+# kubectl apply -f command-depl.yaml
+# port forwarding to the service can be done using:
+# kubectl port-forward service/command-clusterip-srv 8080:80
+# port :80 meaning that the service will listen on port 80, and targetPort: 8080 means that the service will route traffic to port 8080 on the pods that are selected by the service (in this case, the pods created by the command-depl Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: command-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: commandservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

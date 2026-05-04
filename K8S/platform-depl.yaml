@@ -40,3 +40,24 @@ spec:
         image: meenumee/platformservice:latest
         ports:
           - containerPort: 8080
+# Note: The containerPort is set to 8080, which means that the application inside the container is listening on port 8080. The Service defined in the platform-np-srv.yaml file will route traffic to this port on the pods created by this Deployment.
+---
+# This YAML file defines a Kubernetes Service of type ClusterIP for the PlatformService application.
+# The Service is configured to expose port 80 for the application and route traffic to the pods that are labeled with "app: platformservice".
+# To apply this service configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f platform-depl.yaml
+# port forwarding to the service can be done using:
+# kubectl port-forward service/platform-clusterip-srv 8080:80
+# port :80 meaning that the service will listen on port 80, and targetPort: 8080 means that the service will route traffic to port 8080 on the pods that are selected by the service (in this case, the pods created by the platform-depl Deployment).
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: platformservice
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
