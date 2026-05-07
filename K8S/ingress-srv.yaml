@@ -1,0 +1,50 @@
+# This YAML file defines a Kubernetes Ingress resource that routes incoming HTTP requests to the appropriate backend services based on the specified paths. 
+# The Ingress is configured to use the NGINX Ingress Controller, and it defines two rules for routing traffic to the PlatformService and CommandService applications.
+# This Ingress allows external access to the services running in the Kubernetes cluster by defining rules that match incoming requests based on the host and path, and then routing those requests to the corresponding services.
+# You can define host and path-based routing rules in the Ingress to control how traffic is directed to your services, making it easier to manage and expose multiple services under a single domain name in order to provide a unified access point for your applications instead of exposing each service separately like in the case of NodePort or LoadBalancer services which expose each service on a separate port or IP address and can be more complex to manage when you have multiple services.
+# Locally you have to add the host entry in your hosts file to point to the IP address of your Kubernetes cluster (e.g., 127.0.0.1 acme.com) in order to test the Ingress rules using the defined host (acme.com) in your API testing tool or browser.
+# 127.0.0.1 acme.com means that when you access acme.com in your browser or API testing tool, it will resolve to the local IP address where your Kubernetes cluster is running.
+
+# To apply this Ingress configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f ingress-srv.yaml
+# After applying the Ingress, you can check the status of the Ingress and the associated rules using:
+# kubectl get ingress
+# kubectl describe ingress ingress-srv
+
+# The Ingress resource is defined with the following specifications:
+# - apiVersion: Specifies the API version of the Kubernetes resource (networking.k8s.io/v1 for Ingress).
+# - kind: Specifies the type of Kubernetes resource (Ingress).
+# - metadata: Contains metadata about the resource, such as its name and annotations. The annotations specify that the Ingress should use the NGINX Ingress Controller and enable regex for path matching.
+# - spec: Contains the specifications for the Ingress, including the rules for routing traffic.
+# - rules: Defines the rules for routing incoming HTTP requests based on the host and path. In this case, the host is "acme.com", and there are two paths defined:
+# 1. /api/platforms: This path routes traffic to the "platform-clusterip-srv" service on port 80, which corresponds to the PlatformService application.
+# 2. /api/c/platforms: This path routes traffic to the "command-clusterip-srv" service on port 80, which corresponds to the CommandService application.
+
+# In postman or any API testing tool, you can test the Ingress by sending HTTP requests to the defined paths (e.g., http://acme.com/api/platforms and http://acme.com/api/c/platforms) and verifying that the requests are correctly routed to the respective services.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: acme.com
+    http:
+      paths:
+        - path: /api/platforms
+          pathType: Prefix
+          backend:
+            service:
+              name: platform-clusterip-srv
+              port:
+                number: 80
+        - path: /api/c/platforms
+          pathType: Prefix 
+          backend:
+            service:
+              name: command-clusterip-srv
+              port:
+                number: 80
