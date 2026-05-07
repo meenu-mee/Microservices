@@ -1,0 +1,26 @@
+# This YAML file defines a PersistentVolumeClaim (PVC) named "mssql-claim" that requests 200Mi of storage with ReadWriteOnce access mode. --- IGNORE ---
+# The PVC is used to provide persistent storage for the SQL Server instance running in the mssql-plat-depl Deployment. --- IGNORE ---
+# To apply this PVC configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f local-pvc.yaml
+# After applying the PVC, you can check the status of the PVC and the associated PersistentVolume using:
+# kubectl get pvc
+# kubectl get pv
+
+# The PersistentVolumeClaim resource is defined with the following specifications:
+# - apiVersion: Specifies the API version of the Kubernetes resource (v1 for PersistentVolumeClaims).
+# - kind: Specifies the type of Kubernetes resource (PersistentVolumeClaim).
+# - metadata: Contains metadata about the resource, such as its name.
+# - spec: Contains the specifications for the PersistentVolumeClaim, including the access modes and resource requests.
+# - accessModes: Specifies the access mode for the PVC, which determines how the volume can be accessed. In this case, ReadWriteOnce means that the volume can be mounted as read-write by a single node so that only one pod can use the volume at a time. This is suitable for scenarios where the volume is used by a single instance of an application, such as a database.
+# - resources: Specifies the resource requests for the PVC, including the amount of storage requested. In this case, the PVC requests 200Mi (200 Mebibytes, approximately 200 MB) of storage, which means
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources: 
+    requests:
+      storage: 200Mi

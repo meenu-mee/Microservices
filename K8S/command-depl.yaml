@@ -20,11 +20,21 @@ spec:
           - containerPort: 8080
 # Note: The containerPort is set to 8080, which means that the application inside the container is listening on port 8080. The Service defined in the platform-np-srv.yaml file will route traffic to this port on the pods created by this Deployment.
 ---
-# This YAML file defines a Kubernetes Service of type ClusterIP for the CommandService application.
+# This is a Kubernetes Service of type ClusterIP for the CommandService application defined in the command-depl Deployment. The Service is configured to expose port 80 for the application and route traffic from the cluster to the pods that are labeled with "app: commandservice". 
+
+#To apply this service configuration to your Kubernetes cluster, you can use the following command:
 # kubectl apply -f command-depl.yaml
-# port forwarding to the service can be done using:
+# After applying the service, you can check the status of the service and the endpoints using:
+# kubectl get services
+# kubectl get endpoints 
+
+# Port forwarding to the service can be done to access the CommandService application running in the cluster using:
 # kubectl port-forward service/command-clusterip-srv 8080:80
-# port :80 meaning that the service will listen on port 80, and targetPort: 8080 means that the service will route traffic to port 8080 on the pods that are selected by the service (in this case, the pods created by the command-depl Deployment).
+# port:80 meaning that the service will listen on port 80, and targetPort: 8080 means that the service will route traffic to port 8080 on the pods that are selected by the service. 
+# In this case, the pods created by the command-depl Deployment will be selected by this service, allowing external traffic to access the CommandService application through the ClusterIP service.
+
+# In appsettings.Production.json of the PlatformService application, the CommandService URL should be updated to point to the ClusterIP service defined in this YAML file. For example, if the service name is "command-clusterip-srv" and it is in the same namespace as the PlatformService, the URL can be set to "http://command-clusterip-srv:80" to allow the PlatformService to communicate with the CommandService using the ClusterIP service.
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -34,6 +44,7 @@ spec:
   selector:
     app: commandservice
   ports:
-    - protocol: TCP
+    - name: commandservice
+      protocol: TCP
       port: 80
       targetPort: 8080
