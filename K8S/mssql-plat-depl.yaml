@@ -1,0 +1,104 @@
+# This YAML file defines a Kubernetes Deployment for a Microsoft SQL Server instance. 
+# The deployment is named "mssql-plat-depl" and it creates a single replica of the SQL Server container. 
+# The container uses the image "mcr.microsoft.com/mssql/server:2019-latest" and exposes port 1433 for SQL Server communication. 
+# The deployment also sets environment variables for the SQL Server instance, including the edition (Express-free), acceptance of the EULA, and the SA password, which is retrieved from a Kubernetes secret named "mssql". 
+# Volumes are defined to mount a persistent volume claim named "mssql-claim" to the path "/var/opt/mssql/data" inside the container, allowing SQL Server data to be stored persistently.
+
+# Additionally, the YAML file defines two services:
+# 1. A ClusterIP service named "mssql-clusterip-srv" that exposes port 1433 and routes traffic to the SQL Server pods within the cluster, allowing internal access to the SQL Server instance.
+# 2. A LoadBalancer service named "mssql-loadbalancer-srv" that also exposes port 1433 and routes traffic to the SQL Server pods, allowing external access to the SQL Server instance.
+# Different service types (ClusterIP and LoadBalancer) are used to provide different levels of access to the SQL Server instance, with ClusterIP being accessible only within the cluster and LoadBalancer allowing external access.
+# Both services use same port because they route traffic to the same SQL Server instance, but they provide different access methods based on the service type.
+
+# Note: The SA_PASSWORD environment variable is set using a Kubernetes secret, which is a secure way to manage sensitive information. You should create the secret before applying this deployment configuration to your Kubernetes cluster.
+# You can create the mssql secret using the following command:
+# kubectl create secret generic mssql --from-literal=SA_PASSWORD=YourStrong@Passw0rd
+
+#To apply this deployment configuration to your Kubernetes cluster, you can use the following command:
+# kubectl apply -f mssql-plat-depl.yaml
+# After applying the deployment, you can check the status of the deployment and the running pods using:
+# kubectl get deployments
+# kubectl get pods
+# You can also check the services using:
+# kubectl get services
+
+# Port forwarding to the LoadBalancer service can be done to access the SQL Server instance from outside the cluster using:
+# kubectl port-forward service/mssql-loadbalancer-srv 1433:1433
+# This command forwards port 1433 on your local machine to port 1433 on the LoadBalancer service, allowing you to connect to the SQL Server instance using a SQL client on your local machine from outside the cluster. Note that the LoadBalancer service may also provide an external IP address that you can use to connect to the SQL Server instance directly without port forwarding, depending on your cloud provider's configuration. You can check the external IP address of the LoadBalancer service using:
+# kubectl get services mssql-loadbalancer-srv
+
+# apiVersion: Specifies the API version of the Kubernetes resource (apps/v1 for Deployments and v1 for Services).
+# kind: Specifies the type of Kubernetes resource (Deployment for the SQL Server instance and Service for the services).
+# metadata: Contains metadata about the resource, such as its name.
+# spec: Contains the specifications for the resource, including the number of replicas, selector for matching pods, template for pod specification, and service configuration.
+# The Deployment resource defines the desired state for the SQL Server instance, while the Service resources define how to expose the SQL Server instance within the cluster and to the outside world. 
+
+# The use of environment variables and volume mounts in the Deployment ensures that the SQL Server instance is configured correctly and that data is stored persistently, while the services provide different access methods to the SQL Server instance based on the service type.
+# env: Defines environment variables for the container, including MSSQL_PID, ACCEPT_EULA, and SA_PASSWORD, which are necessary for configuring the SQL Server instance.
+# volumeMounts: Defines the volume mounts for the container, allowing the SQL Server instance to store data persistently on a volume defined in the volumes section of the pod specification.
+# mountPath: Specifies the path inside the container where the volume will be mounted, allowing the SQL Server instance to read and write data to that location.
+# volumes: Defines the volumes for the pod, including a persistent volume claim named "mssql-claim" that is used to store SQL Server data persistently, ensuring that data is not lost when the pod is restarted or rescheduled to a different node in the cluster. The persistent volume claim should be created separately before applying this deployment configuration to the Kubernetes cluster.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-plat-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers: 
+        - name: mssql
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          ports:
+            - containerPort: 1433
+          env:
+          - name: MSSQL_PID
+            value: "Express"
+          - name: ACCEPT_EULA
+            value: "Y"
+          - name: SA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mssql
+                key: SA_PASSWORD
+          volumeMounts:
+          - mountPath: /var/opt/mssql/data
+            name: mssqldb
+      volumes:
+      - name: mssqldb
+        persistentVolumeClaim:
+          claimName: mssql-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: mssql
+  ports:
+    - name: mssql
+      protocol: TCP
+      port: 1433
+      targetPort: 1433
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-loadbalancer-srv
+spec:
+  type: LoadBalancer
+  selector:
+    app: mssql
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
